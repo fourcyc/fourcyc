@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fourcyc Store</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    margin:0;
+    background:#f5f5f5;
+}
+
+header{
+    background:#111;
+    color:white;
+    padding:18px;
+    text-align:center;
+}
+
+header img{ height:55px; }
+
+/* PRODUCT */
+.container{
+    display:grid;
+    grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
+    gap:15px;
+    padding:15px;
+}
+
+.card{
+    background:white;
+    border-radius:12px;
+    padding:12px;
+    text-align:center;
+    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+}
+
+.card img{
+    width:100%;
+    border-radius:10px;
+}
+
+.price{
+    font-weight:bold;
+    margin:6px 0;
+}
+
+.status{
+    font-size:12px;
+    color:green;
+    font-weight:bold;
+}
+
+.status.restock{ color:red; }
+
+.variant-btn{
+    padding:6px;
+    margin:3px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:12px;
+}
+
+.add-btn{
+    width:100%;
+    padding:10px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+    background:#e60000;
+    color:white;
+    margin-top:8px;
+}
+
+.add-btn:disabled{
+    background:#aaa;
+    cursor:not-allowed;
+}
+
+/* CART */
+.cart-box{
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    background:white;
+    box-shadow:0 -2px 10px rgba(0,0,0,0.2);
+    padding:10px;
+    max-height:45vh;
+    overflow:auto;
+}
+
+.cart-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:12px;
+    border-bottom:1px solid #eee;
+    padding:6px 0;
+}
+
+.qty-btn{
+    background:#ddd;
+    padding:2px 6px;
+    border-radius:4px;
+    margin:0 2px;
+    cursor:pointer;
+}
+
+.remove{
+    background:red;
+    color:white;
+    padding:2px 6px;
+    border-radius:4px;
+    cursor:pointer;
+}
+
+input, textarea{
+    width:100%;
+    padding:8px;
+    margin:4px 0;
+    border:1px solid #ddd;
+    border-radius:6px;
+}
+
+.checkout-btn{
+    background:green;
+    color:white;
+}
+
+.note{
+    font-size:11px;
+    color:#555;
+    margin:5px 0;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <img src="logo.PNG">
+    <h1>FOURCYC STORE</h1>
+    <p>Performance Cycling Accessories</p>
+</header>
+
+<div class="container">
+
+    <!-- V1 -->
+    <div class="card">
+        <img id="img-v1" src="aero-socks-v1.PNG">
+
+        <h3>Aero Socks V1</h3>
+        <div class="price">Rp99.000</div>
+        <div class="status">READY</div>
+
+        <button class="variant-btn" onclick="changeImg('v1','white')">White</button>
+        <button class="variant-btn" onclick="changeImg('v1','black')">Black</button>
+
+        <button id="btn-v1" class="add-btn" onclick="addItem('Aero Socks V1 White',99000)">Tambah</button>
+    </div>
+
+    <!-- V2 -->
+    <div class="card">
+        <img id="img-v2" src="aero-socks-v2.PNG">
+
+        <h3>Aero Socks V2</h3>
+        <div class="price">Rp99.000</div>
+        <div class="status">READY</div>
+
+        <button class="variant-btn" onclick="changeImg('v2','white')">White</button>
+        <button class="variant-btn" onclick="changeImg('v2','black')">Black</button>
+
+        <button id="btn-v2" class="add-btn" onclick="addItem('Aero Socks V2 White',99000)">Tambah</button>
+    </div>
+
+    <!-- V4 -->
+    <div class="card">
+        <img src="aero-socks-v4.PNG">
+        <h3>Aero Socks V4</h3>
+        <div class="price">Rp169.000</div>
+        <div class="status restock">RESTOCK</div>
+        <button class="add-btn" disabled>RESTOCK</button>
+    </div>
+
+    <!-- COVER SHOES -->
+    <div class="card">
+        <img src="cover-shoes-aero.PNG">
+        <h3>Cover Shoes Aero</h3>
+        <div class="price">Rp379.000</div>
+        <div class="status">READY</div>
+        <button class="add-btn" onclick="addItem('Cover Shoes Aero',379000)">Tambah</button>
+    </div>
+
+</div>
+
+<!-- CART -->
+<div class="cart-box">
+
+    <div id="cartList">🛒 Keranjang kosong</div>
+
+    <input id="nama" placeholder="Nama">
+    <input id="nohp" placeholder="No WhatsApp">
+    <textarea id="alamat" placeholder="Alamat lengkap"></textarea>
+
+    <div class="note">
+        ⚠️ Harga belum termasuk ongkir<br>
+        📦 Ongkir dihitung via WhatsApp
+    </div>
+
+    <button class="checkout-btn" onclick="checkout()">Kirim ke WhatsApp</button>
+</div>
+
+<script>
+let cart = [];
+
+let currentVariant = {
+    v1: "white",
+    v2: "white"
+};
+
+function changeImg(product, color){
+    currentVariant[product] = color;
+
+    let img = document.getElementById("img-"+product);
+    let btn = document.getElementById("btn-"+product);
+
+    if(product === "v1"){
+        if(color === "white"){
+            img.src = "aero-socks-v1.PNG";
+            btn.onclick = () => addItem("Aero Socks V1 White",99000);
+        } else {
+            img.src = "hitam-v1.PNG";
+
+            // BLACK OUT OF STOCK (kalau mau aktif nanti tinggal hapus disable)
+            btn.onclick = null;
+            btn.innerText = "Black Habis";
+            btn.disabled = true;
+            return;
+        }
+
+        btn.innerText = "Tambah";
+        btn.disabled = false;
+    }
+
+    if(product === "v2"){
+        if(color === "white"){
+            img.src = "aero-socks-v2.PNG";
+            btn.onclick = () => addItem("Aero Socks V2 White",99000);
+        } else {
+            img.src = "hitam-v2.PNG";
+
+            // BLACK OUT OF STOCK
+            btn.onclick = null;
+            btn.innerText = "Black Habis";
+            btn.disabled = true;
+            return;
+        }
+
+        btn.innerText = "Tambah";
+        btn.disabled = false;
+    }
+}
+
+function addItem(name, price){
+    let found = cart.find(i => i.name === name);
+
+    if(found){
+        found.qty++;
+    } else {
+        cart.push({name, price, qty:1});
+    }
+
+    renderCart();
+}
+
+function increase(i){ cart[i].qty++; renderCart(); }
+function decrease(i){ cart[i].qty--; if(cart[i].qty<=0) cart.splice(i,1); renderCart(); }
+function removeItem(i){ cart.splice(i,1); renderCart(); }
+
+function renderCart(){
+    let el = document.getElementById("cartList");
+
+    if(cart.length === 0){
+        el.innerHTML = "🛒 Keranjang kosong";
+        return;
+    }
+
+    let html = "";
+    let total = 0;
+
+    cart.forEach((item,i)=>{
+        total += item.price * item.qty;
+
+        html += `
+        <div class="cart-item">
+            <div>
+                ${item.name}<br>
+                Rp${item.price.toLocaleString()} x ${item.qty}
+            </div>
+            <div>
+                <span class="qty-btn" onclick="decrease(${i})">-</span>
+                <span class="qty-btn" onclick="increase(${i})">+</span>
+                <span class="remove" onclick="removeItem(${i})">x</span>
+            </div>
+        </div>`;
+    });
+
+    el.innerHTML = html + "<br><b>Total: Rp"+total.toLocaleString()+"</b>";
+}
+
+function checkout(){
+    if(cart.length === 0){
+        alert("Keranjang kosong");
+        return;
+    }
+
+    let nama = document.getElementById("nama").value;
+    let nohp = document.getElementById("nohp").value;
+    let alamat = document.getElementById("alamat").value;
+
+    let msg = "ORDER FOURCYC STORE\n\n";
+    msg += "Nama: "+nama+"\n";
+    msg += "No HP: "+nohp+"\n";
+    msg += "Alamat: "+alamat+"\n\n";
+
+    msg += "DETAIL PESANAN:\n";
+
+    let total = 0;
+
+    cart.forEach((item,i)=>{
+        let sub = item.price * item.qty;
+        total += sub;
+        msg += `${i+1}. ${item.name} x${item.qty} = Rp${sub}\n`;
+    });
+
+    msg += "\nTOTAL: Rp"+total+"\n";
+    msg += "\nNOTE:\n- Harga belum termasuk ongkir\n- Ongkir via WhatsApp\n";
+
+    window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank");
+}
+</script>
+
+</body>
+</html>
