@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fourcyc Store</title>
+
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:#f5f5f5;
+}
+
+/* HEADER */
+header{
+background:#111;
+padding:15px;
+display:flex;
+align-items:center;
+}
+
+.menu{
+font-size:26px;
+color:#111;
+cursor:pointer;
+margin-right:10px;
+background:#fff; /* FIX putih */
+padding:6px 10px;
+border-radius:8px;
+box-shadow:0 2px 6px rgba(0,0,0,0.15);
+}
+
+.logoBox{
+flex:1;
+display:flex;
+justify-content:flex-start;
+}
+
+.logoBox img{
+height:110px;
+}
+
+/* PRODUCT */
+.container{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
+gap:12px;
+padding:12px;
+}
+
+.card{
+background:#fff;
+padding:10px;
+border-radius:12px;
+text-align:center;
+box-shadow:0 3px 10px rgba(0,0,0,0.08);
+}
+
+.card img{
+width:100%;
+border-radius:10px;
+}
+
+button{
+width:100%;
+padding:10px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+margin-top:5px;
+}
+
+.buy{
+background:#e60000;
+color:white;
+}
+
+.disabled{
+background:#aaa;
+color:white;
+cursor:not-allowed;
+}
+
+/* PAGES */
+.page{
+display:none;
+padding:12px;
+}
+
+/* CART BUTTON */
+.cart-btn{
+position:fixed;
+right:15px;
+bottom:15px;
+background:black;
+color:white;
+padding:12px;
+border-radius:50px;
+}
+
+/* MENU */
+#sideMenu{
+position:fixed;
+top:0;
+left:-260px;
+width:240px;
+height:100%;
+background:#fff;
+color:#111;
+padding:20px;
+transition:0.3s;
+z-index:9999;
+box-shadow:2px 0 15px rgba(0,0,0,0.15);
+}
+
+#bg{
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.5);
+z-index:9998;
+}
+
+.dropdown{
+max-height:0;
+overflow:hidden;
+transition:0.3s;
+}
+
+.dropdown.active{
+max-height:250px;
+}
+
+/* TOAST */
+#toast{
+position:fixed;
+bottom:80px;
+left:50%;
+transform:translateX(-50%);
+background:black;
+color:white;
+padding:10px 15px;
+border-radius:8px;
+opacity:0;
+transition:0.3s;
+}
+
+/* INPUT */
+input,textarea{
+width:100%;
+padding:8px;
+margin-top:5px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="menu" onclick="openMenu()">☰</div>
+<div class="logoBox">
+<img src="logo.jpg">
+</div>
+</header>
+
+<!-- PAGE 1 HOME -->
+<div id="page1" class="page" style="display:block;">
+
+<div class="container">
+
+<!-- V1 -->
+<div class="card">
+<img id="imgV1" src="aero-socks-v1.PNG">
+<h3>V1 Socks</h3>
+<button onclick="setV1('white');addToCart('V1 Putih',99000)">Putih</button>
+<button class="disabled">Hitam (Preview)</button>
+</div>
+
+<!-- V2 -->
+<div class="card">
+<img id="imgV2" src="aero-socks-v2.PNG">
+<h3>V2 Socks</h3>
+<button onclick="setV2('white');addToCart('V2 Putih',109000)">Putih</button>
+<button class="disabled">Hitam (Preview)</button>
+</div>
+
+<!-- V4 -->
+<div class="card">
+<img src="aero-socks-v4.PNG">
+<h3>V4 RESTOCK</h3>
+<button class="disabled">RESTOCK</button>
+</div>
+
+<!-- COVER -->
+<div class="card">
+<img src="cover-shoes-aero.PNG">
+<h3>Cover Shoes</h3>
+<button onclick="addToCart('Cover Shoes',379000)">Tambah</button>
+</div>
+
+</div>
+
+<button class="buy" onclick="goPage(2)">🛒 Lihat Keranjang</button>
+
+</div>
+
+<!-- PAGE 2 CART -->
+<div id="page2" class="page">
+
+<h3>Keranjang</h3>
+
+<div id="list"></div>
+<h4 id="total"></h4>
+
+<button onclick="goPage(1)" style="background:#aaa;color:white;">
+⬅ Kembali ke Produk
+</button>
+
+<button onclick="goPage(3)" class="buy">
+Lanjut Checkout
+</button>
+
+</div>
+
+<!-- PAGE 3 CHECKOUT -->
+<div id="page3" class="page">
+
+<h3>Data Pembeli</h3>
+
+<input id="nama" placeholder="Nama">
+<input id="hp" placeholder="No WhatsApp">
+<textarea id="alamat" placeholder="Alamat"></textarea>
+
+<hr>
+
+<h3>Payment</h3>
+<button onclick="selectPay('QRIS')">QRIS</button>
+<button onclick="selectPay('DANA')">DANA</button>
+
+<p id="payStatus">Belum dipilih</p>
+
+<hr>
+
+<button onclick="checkout()" class="buy">
+KIRIM KE WHATSAPP
+</button>
+
+</div>
+
+<!-- CART -->
+<div class="cart-btn" onclick="goPage(2)">
+🛒 <span id="count">0</span>
+</div>
+
+<!-- MENU -->
+<div id="sideMenu">
+
+<p onclick="goPage(1)">🏠 Home</p>
+<p onclick="alert('About Us: Fourcyc Store - kualitas bagus harga terjangkau')">ℹ️ About Us</p>
+
+<hr>
+
+<p onclick="toggle('pay')">💳 Payment Method ▾</p>
+<div id="payMenu" class="dropdown">
+<div style="display:flex;gap:10px;margin-top:10px;">
+<img src="qris.png" style="width:90px;">
+<img src="dana.png" style="width:90px;">
+</div>
+</div>
+
+<p onclick="toggle('ship')">🚚 Shipping Method ▾</p>
+<div id="shipMenu" class="dropdown">
+<div style="display:flex;justify-content:center;">
+<img src="jnt.png" style="width:120px;">
+</div>
+</div>
+
+<p onclick="closeMenu()" style="color:red;">Close</p>
+
+</div>
+
+<div id="bg" onclick="closeMenu()"></div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+
+let cart=[];
+let payment="";
+
+/* PAGE */
+function goPage(n){
+document.getElementById("page1").style.display="none";
+document.getElementById("page2").style.display="none";
+document.getElementById("page3").style.display="none";
+
+document.getElementById("page"+n).style.display="block";
+
+if(n===2) renderCart();
+}
+
+/* VARIANT */
+function setV1(c){
+document.getElementById("imgV1").src=
+c==="white"?"aero-socks-v1.PNG":"hitam-v1.PNG";
+}
+
+function setV2(c){
+document.getElementById("imgV2").src=
+c==="white"?"aero-socks-v2.PNG":"hitam-v2.PNG";
+}
+
+/* CART */
+function addToCart(name,price){
+let f=cart.find(x=>x.nama===name);
+if(f) f.qty++;
+else cart.push({nama:name,price:price,qty:1});
+updateCart();
+showToast("✔ Ditambahkan ke keranjang");
+}
+
+function updateCart(){
+document.getElementById("count").innerText=
+cart.reduce((a,b)=>a+b.qty,0);
+}
+
+function renderCart(){
+let html="";
+let total=0;
+
+cart.forEach((x,i)=>{
+total+=x.price*x.qty;
+
+html+=`
+<div>
+${x.nama}<br>
+<button onclick="minus(${i})">-</button>
+${x.qty}
+<button onclick="plus(${i})">+</button>
+</div><br>
+`;
+});
+
+document.getElementById("list").innerHTML=html;
+document.getElementById("total").innerText="Total: Rp"+total;
+}
+
+function plus(i){
+cart[i].qty++;
+renderCart();updateCart();
+}
+
+function minus(i){
+cart[i].qty--;
+if(cart[i].qty<=0) cart.splice(i,1);
+renderCart();updateCart();
+}
+
+/* PAYMENT */
+function selectPay(t){
+payment=t;
+document.getElementById("payStatus").innerText="Payment: "+t;
+}
+
+/* CHECKOUT */
+function checkout(){
+if(payment===""){alert("Pilih payment dulu");return;}
+
+let msg="ORDER FOURCYC STORE\n\n";
+msg+="Nama: "+nama.value+"\n";
+msg+="HP: "+hp.value+"\n";
+msg+="Alamat: "+alamat.value+"\n\n";
+
+cart.forEach(x=>{
+msg+=x.nama+" x"+x.qty+"\n";
+});
+
+msg+="\nPayment: "+payment;
+
+window.open("https://api.whatsapp.com/send?text="+encodeURIComponent(msg));
+}
+
+/* MENU */
+function openMenu(){
+sideMenu.style.left="0";
+bg.style.display="block";
+}
+
+function closeMenu(){
+sideMenu.style.left="-260px";
+bg.style.display="none";
+}
+
+function toggle(t){
+document.getElementById(t+"Menu").classList.toggle("active");
+}
+
+/* TOAST */
+function showToast(t){
+toast.innerText=t;
+toast.style.opacity="1";
+setTimeout(()=>toast.style.opacity="0",1500);
+}
+
+</script>
+
+</body>
+</html>
