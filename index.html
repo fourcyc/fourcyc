@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fourcyc Store</title>
+
+<style>
+body{
+    font-family:Arial;
+    margin:0;
+    background:#f5f5f5;
+}
+
+/* HEADER */
+header{
+    background:#111;
+    padding:30px;
+    text-align:center;
+    position:relative;
+}
+header img{height:100px;}
+
+.menu{
+    position:absolute;
+    left:15px;
+    top:20px;
+    font-size:26px;
+    color:white;
+    cursor:pointer;
+}
+
+/* PRODUCT */
+.container{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:15px;
+    padding:15px;
+}
+
+.card{
+    background:#fff;
+    padding:12px;
+    border-radius:12px;
+    text-align:center;
+    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+}
+
+.card img{width:100%;border-radius:10px;}
+
+.price{font-weight:bold;}
+button{
+    width:100%;
+    padding:10px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.white{background:#e60000;color:white;}
+
+/* CART */
+.cart-btn{
+    position:fixed;
+    right:15px;
+    bottom:15px;
+    background:black;
+    color:white;
+    padding:12px 15px;
+    border-radius:50px;
+    cursor:pointer;
+}
+
+/* OVERLAY */
+.overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:white;
+    padding:15px;
+    overflow:auto;
+}
+
+.step{display:none;}
+.step.active{display:block;}
+
+input,textarea{
+    width:100%;
+    padding:8px;
+    margin-top:5px;
+    border-radius:6px;
+    border:1px solid #ccc;
+}
+
+.next,.back,.checkout{
+    width:100%;
+    padding:10px;
+    margin-top:10px;
+    border:none;
+    border-radius:8px;
+    font-weight:bold;
+}
+
+.next{background:black;color:white;}
+.back{background:#ddd;}
+.checkout{background:green;color:white;}
+
+/* MENU */
+#sideMenu{
+    position:fixed;
+    top:0;
+    left:-260px;
+    width:220px;
+    height:100%;
+    background:#111;
+    color:white;
+    padding:20px;
+    transition:0.3s;
+    z-index:999;
+}
+
+#sideMenu p{
+    margin:8px 0;
+    font-size:14px;
+}
+
+#bg{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.4);
+    z-index:998;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="menu" onclick="openMenu()">☰</div>
+<img src="logo.jpg">
+</header>
+
+<!-- HOME -->
+<div id="homePage">
+
+<div class="container">
+
+<div class="card">
+<img src="aero-socks-v1.PNG">
+<h3>V1</h3>
+<div class="price">Rp99.000</div>
+<button class="white" onclick="add('V1',99000)">Tambah</button>
+</div>
+
+<div class="card">
+<img src="cover-shoes-aero.PNG">
+<h3>Cover Shoes</h3>
+<div class="price">Rp379.000</div>
+<button class="white" onclick="add('Cover Shoes',379000)">Tambah</button>
+</div>
+
+</div>
+
+</div>
+
+<!-- ABOUT -->
+<div id="aboutPage" style="display:none;padding:20px;">
+<h2>About Us</h2>
+<p>
+Fourcyc Store adalah brand aksesoris sepeda yang fokus pada kualitas, kenyamanan, dan performa.
+</p>
+<p>
+Ride Faster. Ride Smarter.
+</p>
+</div>
+
+<!-- CART -->
+<div class="cart-btn" onclick="openCart()">🛒 <span id="count">0</span></div>
+
+<div class="overlay" id="cart">
+
+<h3>Checkout</h3>
+
+<!-- STEP 1 -->
+<div id="step1" class="step active">
+<div id="list"></div>
+<div id="total"></div>
+<button class="next" onclick="step2()">Lanjut</button>
+</div>
+
+<!-- STEP 2 -->
+<div id="step2" class="step">
+<input id="nama" placeholder="Nama">
+<input id="hp" placeholder="No WA">
+<textarea id="alamat" placeholder="Alamat"></textarea>
+<button class="back" onclick="step1()">Kembali</button>
+<button class="next" onclick="step3()">Lanjut</button>
+</div>
+
+<!-- STEP 3 -->
+<div id="step3" class="step">
+
+<div style="font-weight:bold;">Pilih Payment</div>
+
+<button onclick="selectPay('QRIS')">QRIS</button>
+<button onclick="selectPay('DANA')">DANA</button>
+
+<div id="payStatus" style="font-size:12px;color:#555;margin-top:5px;">
+Belum dipilih
+</div>
+
+<button class="back" onclick="step2()">Kembali</button>
+<button class="checkout" onclick="checkout()">Kirim WA</button>
+
+</div>
+
+</div>
+
+<!-- MENU -->
+<div id="sideMenu">
+
+<h3>Menu</h3>
+
+<p onclick="goHome()">🏠 Home</p>
+<p onclick="goAbout()">ℹ️ About Us</p>
+
+<hr>
+
+<p>💳 QRIS</p>
+<p>💸 DANA</p>
+
+<hr>
+
+<p>🚚 J&T Express</p>
+
+<p onclick="closeMenu()" style="color:red;margin-top:15px;">✕ Close</p>
+
+</div>
+
+<div id="bg" onclick="closeMenu()"></div>
+
+<script>
+
+let cart=[];
+let paymentMethod="";
+
+/* CART */
+function add(n,p){
+let f=cart.find(x=>x.nama===n);
+if(f) f.qty++;
+else cart.push({nama:n,price:p,qty:1});
+update();
+}
+
+function update(){
+document.getElementById("count").innerText=
+cart.reduce((a,b)=>a+b.qty,0);
+}
+
+function render(){
+let html="",total=0;
+cart.forEach(x=>{
+total+=x.price*x.qty;
+html+=`<div>${x.nama} x${x.qty}</div>`;
+});
+document.getElementById("list").innerHTML=html;
+document.getElementById("total").innerHTML="Total: Rp"+total;
+}
+
+/* CART */
+function openCart(){
+document.getElementById("cart").style.display="block";
+step1();
+render();
+}
+function step1(){show(1)}
+function step2(){show(2)}
+function step3(){show(3)}
+
+function show(n){
+document.querySelectorAll(".step").forEach(s=>s.classList.remove("active"));
+document.getElementById("step"+n).classList.add("active");
+}
+
+/* PAYMENT */
+function selectPay(type){
+paymentMethod=type;
+document.getElementById("payStatus").innerText=
+"Payment: "+type;
+}
+
+/* WA */
+function checkout(){
+
+if(paymentMethod===""){
+alert("Pilih payment dulu");
+return;
+}
+
+let nama=document.getElementById("nama").value;
+let hp=document.getElementById("hp").value;
+let alamat=document.getElementById("alamat").value;
+
+let msg="ORDER FOURCYC STORE\n\n";
+msg+="Nama: "+nama+"\n";
+msg+="HP: "+hp+"\n";
+msg+="Alamat: "+alamat+"\n\n";
+
+let total=0;
+cart.forEach(x=>{
+total+=x.price*x.qty;
+msg+=x.nama+" x"+x.qty+"\n";
+});
+
+msg+="TOTAL: Rp"+total+"\n";
+msg+="Payment: "+paymentMethod;
+
+window.open("https://api.whatsapp.com/send?phone=6285753790798&text="+encodeURIComponent(msg));
+
+}
+
+/* MENU */
+function openMenu(){
+document.getElementById("sideMenu").style.left="0";
+document.getElementById("bg").style.display="block";
+}
+function closeMenu(){
+document.getElementById("sideMenu").style.left="-260px";
+document.getElementById("bg").style.display="none";
+}
+
+function goHome(){
+document.getElementById("homePage").style.display="block";
+document.getElementById("aboutPage").style.display="none";
+closeMenu();
+}
+
+function goAbout(){
+document.getElementById("homePage").style.display="none";
+document.getElementById("aboutPage").style.display="block";
+closeMenu();
+}
+
+</script>
+
+</body>
+</html>
