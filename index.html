@@ -1,0 +1,35 @@
+function checkout(){
+    if(cart.length === 0){
+        alert("Keranjang kosong");
+        return;
+    }
+
+    let nama = document.getElementById("nama").value;
+    let nohp = document.getElementById("nohp").value;
+    let alamat = document.getElementById("alamat").value;
+
+    let msg = "ORDER FOURCYC STORE\n\n";
+    msg += "Nama: "+nama+"\n";
+    msg += "No HP: "+nohp+"\n";
+    msg += "Alamat: "+alamat+"\n\n";
+
+    msg += "DETAIL PESANAN:\n";
+
+    let total = 0;
+
+    cart.forEach((item,i)=>{
+        let subtotal = item.price * item.qty;
+        total += subtotal;
+
+        msg += `${i+1}. ${item.name} x${item.qty} = Rp${subtotal}\n`;
+    });
+
+    msg += "\nTOTAL: Rp"+total+"\n";
+
+    msg += "\nNOTE:\n";
+    msg += "- Harga belum termasuk ongkir\n";
+    msg += "- Ongkir akan dihitung via WhatsApp\n";
+
+    let wa = "https://wa.me/?text="+encodeURIComponent(msg);
+    window.open(wa,"_blank");
+}
