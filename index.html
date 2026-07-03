@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fourcyc Store</title>
+
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:#f5f5f5;
+}
+
+/* HEADER */
+header{
+background:#111;
+padding:15px;
+display:flex;
+align-items:center;
+}
+
+.menu{
+font-size:26px;
+color:white;
+cursor:pointer;
+margin-right:10px;
+}
+
+.logoBox{
+flex:1;
+display:flex;
+justify-content:flex-start;
+}
+
+.logoBox img{
+height:110px;
+}
+
+/* PRODUCTS */
+.container{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
+gap:12px;
+padding:12px;
+}
+
+.card{
+background:#fff;
+padding:10px;
+border-radius:12px;
+text-align:center;
+box-shadow:0 3px 10px rgba(0,0,0,0.08);
+}
+
+.card img{
+width:100%;
+border-radius:10px;
+}
+
+button{
+width:100%;
+padding:10px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+margin-top:5px;
+}
+
+.buy{
+background:#e60000;
+color:white;
+}
+
+.disabled{
+background:#aaa;
+color:white;
+cursor:not-allowed;
+}
+
+/* CART */
+.cart-btn{
+position:fixed;
+right:15px;
+bottom:15px;
+background:black;
+color:white;
+padding:12px;
+border-radius:50px;
+}
+
+/* OVERLAY */
+.overlay{
+display:none;
+position:fixed;
+inset:0;
+background:white;
+padding:15px;
+overflow:auto;
+}
+
+/* STEP */
+.step{display:none;}
+.step.active{display:block;}
+
+/* INPUT */
+input,textarea{
+width:100%;
+padding:8px;
+margin-top:5px;
+}
+
+/* MENU */
+#sideMenu{
+position:fixed;
+top:0;
+left:-260px;
+width:240px;
+height:100%;
+background:#111;
+color:white;
+padding:20px;
+transition:0.3s;
+z-index:999;
+}
+
+#bg{
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.4);
+}
+
+/* dropdown */
+.dropdown{
+max-height:0;
+overflow:hidden;
+transition:0.3s;
+}
+
+.dropdown.active{
+max-height:250px;
+}
+
+/* TOAST */
+#toast{
+position:fixed;
+bottom:80px;
+left:50%;
+transform:translateX(-50%);
+background:black;
+color:white;
+padding:10px 15px;
+border-radius:8px;
+opacity:0;
+transition:0.3s;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="menu" onclick="openMenu()">☰</div>
+<div class="logoBox">
+<img src="logo.jpg">
+</div>
+</header>
+
+<!-- PRODUCTS -->
+<div class="container">
+
+<!-- V1 -->
+<div class="card">
+<img src="aero-socks-v1.PNG">
+<h3>V1 Socks</h3>
+
+<button onclick="addToCart('Aero Socks V1 (Putih)',99000)">
+Putih
+</button>
+
+<button class="disabled">
+Hitam (Preview)
+</button>
+</div>
+
+<!-- V2 -->
+<div class="card">
+<img src="aero-socks-v2.PNG">
+<h3>V2 Socks</h3>
+
+<button onclick="addToCart('Aero Socks V2 (Putih)',109000)">
+Putih
+</button>
+
+<button class="disabled">
+Hitam (Preview)
+</button>
+</div>
+
+<!-- V4 -->
+<div class="card">
+<img src="aero-socks-v4.PNG">
+<h3>V4 Socks</h3>
+<div>RESTOCK</div>
+<button class="disabled">RESTOCK</button>
+</div>
+
+<!-- COVER SHOES -->
+<div class="card">
+<img src="cover-shoes-aero.PNG">
+<h3>Cover Shoes</h3>
+
+<button onclick="addToCart('Cover Shoes',379000)">
+Putih
+</button>
+</div>
+
+</div>
+
+<!-- CART BUTTON -->
+<div class="cart-btn" onclick="openCart()">
+🛒 <span id="count">0</span>
+</div>
+
+<!-- CHECKOUT -->
+<div class="overlay" id="cart">
+
+<!-- STEP 1 -->
+<div class="step active" id="step1">
+<h3>Keranjang</h3>
+<div id="list"></div>
+<h4 id="total"></h4>
+<button onclick="next(2)">Lanjut</button>
+</div>
+
+<!-- STEP 2 -->
+<div class="step" id="step2">
+<h3>Data Pembeli</h3>
+<input id="nama" placeholder="Nama">
+<input id="hp" placeholder="No WhatsApp">
+<textarea id="alamat" placeholder="Alamat"></textarea>
+<button onclick="next(1)">Back</button>
+<button onclick="next(3)">Lanjut</button>
+</div>
+
+<!-- STEP 3 -->
+<div class="step" id="step3">
+<h3>Payment</h3>
+
+<button onclick="selectPay('QRIS')">QRIS</button>
+<button onclick="selectPay('DANA')">DANA</button>
+
+<p id="payStatus">Belum dipilih</p>
+
+<button onclick="checkout()">KIRIM KE WHATSAPP</button>
+</div>
+
+</div>
+
+<!-- MENU -->
+<div id="sideMenu">
+
+<p onclick="toggle('pay')">💳 Payment Method ▾</p>
+<div id="payMenu" class="dropdown">
+<img src="qris.png" width="80">
+<img src="dana.png" width="80">
+</div>
+
+<p onclick="toggle('ship')">🚚 Shipping Method ▾</p>
+<div id="shipMenu" class="dropdown">
+<img src="jnt.png" width="100">
+</div>
+
+<p onclick="closeMenu()" style="color:red;">Close</p>
+
+</div>
+
+<div id="bg" onclick="closeMenu()"></div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+
+let cart=[];
+let payment="";
+
+/* ADD CART */
+function addToCart(name,price){
+
+let f=cart.find(x=>x.nama===name);
+
+if(f) f.qty++;
+else cart.push({nama:name,price:price,qty:1});
+
+updateCart();
+showToast("✔ Ditambahkan ke keranjang");
+}
+
+/* UPDATE CART */
+function updateCart(){
+document.getElementById("count").innerText=
+cart.reduce((a,b)=>a+b.qty,0);
+}
+
+/* OPEN CART */
+function openCart(){
+document.getElementById("cart").style.display="block";
+renderCart();
+}
+
+/* RENDER CART */
+function renderCart(){
+let html="";
+let total=0;
+
+cart.forEach(x=>{
+total+=x.price*x.qty;
+html+=`${x.nama} x${x.qty}<br>`;
+});
+
+document.getElementById("list").innerHTML=html;
+document.getElementById("total").innerText="Total: Rp"+total;
+}
+
+/* STEP NAV */
+function next(step){
+document.querySelectorAll(".step").forEach(s=>s.classList.remove("active"));
+document.getElementById("step"+step).classList.add("active");
+}
+
+/* PAYMENT */
+function selectPay(type){
+payment=type;
+document.getElementById("payStatus").innerText="Payment: "+type;
+}
+
+/* CHECKOUT WA */
+function checkout(){
+
+if(payment===""){
+alert("Pilih payment dulu");
+return;
+}
+
+let nama=document.getElementById("nama").value;
+let hp=document.getElementById("hp").value;
+let alamat=document.getElementById("alamat").value;
+
+let msg="ORDER FOURCYC STORE\n\n";
+msg+="Nama: "+nama+"\n";
+msg+="HP: "+hp+"\n";
+msg+="Alamat: "+alamat+"\n\n";
+
+cart.forEach(x=>{
+msg+=x.nama+" x"+x.qty+"\n";
+});
+
+msg+="\nPayment: "+payment;
+
+window.open("https://api.whatsapp.com/send?text="+encodeURIComponent(msg));
+}
+
+/* MENU */
+function openMenu(){
+document.getElementById("sideMenu").style.left="0";
+document.getElementById("bg").style.display="block";
+}
+
+function closeMenu(){
+document.getElementById("sideMenu").style.left="-260px";
+document.getElementById("bg").style.display="none";
+}
+
+function toggle(type){
+
+document.getElementById(type+"Menu").classList.toggle("active");
+
+}
+
+/* TOAST */
+function showToast(text){
+let t=document.getElementById("toast");
+t.innerText=text;
+t.style.opacity="1";
+setTimeout(()=>t.style.opacity="0",1500);
+}
+
+</script>
+
+</body>
+</html>
