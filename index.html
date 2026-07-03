@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fourcyc Store</title>
+<style>
+body{
+font-family: Arial, sans-serif;
+margin:0;
+background:#0f0f0f;
+color:#fff;
+}
+header{
+text-align:center;
+padding:20px;
+background:#111;
+}
+header img{
+width:120px;
+border-radius:12px;
+}
+h1{margin:10px 0 5px;}
+.container{
+display:grid;
+grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
+gap:15px;
+padding:15px;
+}
+.card{
+background:#1c1c1c;
+padding:15px;
+border-radius:12px;
+text-align:center;
+}
+.card img{
+width:100%;
+border-radius:10px;
+}
+.status{
+margin-top:8px;
+font-weight:bold;
+}
+.ready{color:#00ff88;}
+.restok{color:#ff4d4d;}
+button{
+margin-top:10px;
+padding:8px 12px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+background:#25D366;
+color:white;
+}
+</style>
+</head>
+<body>
+
+<header>
+<img src="logo.PNG" alt="logo">
+<h1>FOURCYC STORE</h1>
+<p>Performance Cycling Accessories</p>
+</header>
+
+<div class="container">
+
+<div class="card">
+<img src="aero-socks-v1.PNG" alt="v1">
+<h3>AERO SOCKS V1</h3>
+<p>Rp99.000</p>
+<div class="status ready">READY</div>
+<button>Pesan via WhatsApp</button>
+</div>
+
+<div class="card">
+<img src="aero-socks-v2.PNG" alt="v2">
+<h3>AERO SOCKS V2</h3>
+<p>Rp99.000</p>
+<div class="status ready">READY</div>
+<button>Pesan via WhatsApp</button>
+</div>
+
+<div class="card">
+<img src="aero-socks-v4.PNG" alt="v4">
+<h3>AERO SOCKS V4</h3>
+<p>Rp99.000</p>
+<div class="status restok">RESTOK</div>
+<button>Pesan via WhatsApp</button>
+</div>
+
+<div class="card">
+<img src="cover-shoes-aero.PNG" alt="cover">
+<h3>COVER SHOES AERO</h3>
+<p>Rp129.000</p>
+<div class="status ready">READY</div>
+<button>Pesan via WhatsApp</button>
+</div>
+
+</div>
+
+</body>
+</html>
