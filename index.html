@@ -1676,14 +1676,18 @@
       </div>
 
       <div class="form-group">
-        <label for="custName">Nama Lengkap</label>
-        <input type="text" id="custName" placeholder="Masukkan nama lengkap">
+        <label for="destinationSearch">Kecamatan / Kota Tujuan</label>
+        <input type="text" id="destinationSearch" placeholder="Contoh: Surabaya">
       </div>
 
       <div class="form-group">
         <label for="custPhone">Nomor WhatsApp</label>
         <input type="tel" id="custPhone" placeholder="Contoh: 081234567890">
       </div>
+      <div class="form-group">
+  <label>Ongkir J&T</label>
+  <div id="shippingCost">Belum dihitung</div>
+</div>
 
       <div class="form-group">
         <label for="custAddress">Alamat Lengkap</label>
@@ -1876,7 +1880,11 @@ products.forEach(p => {
 });
 
 /* ---------------------- STATE CART ---------------------- */
-let cart = []; // { key, name, price, img, qty }
+let cart = [];
+  let destinationId = "";
+let shippingCost = 0;
+const ORIGIN_ID = "6542";
+const WORKER = "https://fourcyc-ongkir.kv9mfzy2jd.workers.dev";// { key, name, price, img, qty }
 
 /* ---------------------- PROMO ONGKIR (2 TIER) ---------------------- */
 function getOngkirPromoHtml(total) {
@@ -2356,7 +2364,79 @@ document.getElementById('floatingCart').addEventListener('click', () => {
   goToPage('cart');
 });
 
-/* ---------------------- CHECKOUT: PAYMENT SELECT ---------------------- */
+const destinationInput = document.getElementById("destinationSearch");
+const destinationList = document.getElementById("destinationList");
+
+destinationInput.addEventListener("input", async function () {
+
+    const q = this.value.trim();
+
+    if (q.length < 3) {
+        destinationList.innerHTML = "";
+        return;
+    }
+
+    const res = await fetch(
+        `${WORKER}/destination?search=${encodeURIComponent(q)}`
+    );
+
+    const json = await res.json();
+
+    destinationList.innerHTML = "";
+
+    if (!json.data.data) return;
+
+    json.data.data.slice(0,5).forEach(item=>{
+
+        const div=document.createElement("div");
+
+        div.style.padding="8px";
+        div.style.cursor="pointer";
+        div.style.borderBottom="1px solid #ddd";
+
+        div.innerText=item.label;
+
+        div.onclick=async()=>{
+
+            destinationInput.value=item.label;
+
+            destinationId=item.id;
+
+            destinationList.innerHTML="";
+
+            hitungOngkir();
+
+        };
+
+        destinationList.appendChild(div);
+
+    });
+
+});
+  async function hitungOngkir(){
+
+    if(!destinationId) return;
+
+    const berat = cart.reduce((t,i)=>t+(i.weight||500)*i.qty,0);
+
+    const res = await fetch(
+        `${WORKER}/shipping?origin=${ORIGIN_ID}&destination=${destinationId}&weight=${berat}`
+    );
+
+    const json = await res.json();
+
+    const layanan =
+        json.data.data
+        .find(x=>x.code==="jnt");
+
+    if(!layanan) return;
+
+    shippingCost = layanan.cost;
+
+    document.getElementById("shippingCost").innerHTML =
+        "Rp " + shippingCost.toLocaleString("id-ID");
+}
+  /* ---------------------- CHECKOUT: PAYMENT SELECT ---------------------- */
 let selectedPayment = null;
 document.querySelectorAll('.payment-card').forEach(card => {
   card.addEventListener('click', function () {
@@ -2372,7 +2452,14 @@ document.getElementById('checkoutWaBtn').addEventListener('click', function () {
   const name = document.getElementById('custName').value.trim();
   const phone = document.getElementById('custPhone').value.trim();
   const address = document.getElementById('custAddress').value.trim();
+  
+if(!destinationId){
 
+    showToast("Pilih kecamatan tujuan");
+
+    return;
+
+}
   if (cart.length === 0) {
     showToast('Keranjang masih kosong');
     return;
@@ -2398,8 +2485,8 @@ document.getElementById('checkoutWaBtn').addEventListener('click', function () {
   }
 
   const produkList = cart.map(item => `- ${item.name} x${item.qty}`).join('\n');
-  const totalNumber = getCartTotal();
-  const ongkirNote = getOngkirWaNote(totalNumber);
+  const totalNumber = const totalNumber = getCartTotal() + shippingCost;
+  const ongkirNote = `J&T : Rp ${shippingCost.toLocaleString('id-ID')}`;
   const total = formatRupiah(totalNumber);
 
   const message =
@@ -2408,11 +2495,14 @@ document.getElementById('checkoutWaBtn').addEventListener('click', function () {
 Nama: ${name}
 No HP: ${phone}
 Alamat: ${address}
+Kecamatan: ${destinationInput.value}
 
 Produk:
 ${produkList}
 
-Total: ${total} (${ongkirNote})
+Subtotal : ${formatRupiah(getCartTotal())}
+Ongkir J&T : Rp ${shippingCost.toLocaleString('id-ID')}
+Total : ${total}
 Payment: ${selectedPayment}`;
 
   const targetNumber = '6285753790798'; // format internasional dari 085753790798
